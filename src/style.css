@@ -1,1 +1,789 @@
-PLACEHOLDER_CSS
+:root {
+  --ink: #03140f;
+  --ink-deep: #020c09;
+  --forest: #0a2a1f;
+  --emerald: #10b981;
+  --emerald-bright: #34d399;
+  --emerald-deep: #047857;
+  --jade: #6ee7b7;
+  --mist: #9dcdb8;
+  --foam: #e8faf2;
+  --warn: #e8c47a;
+  --ok: #6ee7b7;
+  --accent: #34d399;
+  --accent-deep: #10b981;
+  --glow: rgba(16, 185, 129, 0.28);
+  --sky-wash: #0f3d2e;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Outfit", system-ui, sans-serif;
+  --pad: max(0.85rem, env(safe-area-inset-top));
+}
+
+/* Day cycle — warm sun palette (keeps brand, shifts atmosphere) */
+html[data-sky='day'] {
+  --ink: #1a1208;
+  --ink-deep: #120c05;
+  --forest: #3a2810;
+  --emerald: #d97706;
+  --emerald-bright: #fbbf24;
+  --emerald-deep: #b45309;
+  --jade: #fcd34d;
+  --mist: #d6c4a0;
+  --foam: #fff8eb;
+  --warn: #f59e0b;
+  --ok: #84cc16;
+  --accent: #fbbf24;
+  --accent-deep: #d97706;
+  --glow: rgba(251, 191, 36, 0.32);
+  --sky-wash: #5c3d12;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  height: 100%;
+  background: var(--ink-deep);
+  color: var(--foam);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 110% 70% at 50% -15%, var(--sky-wash) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 45% at 85% 95%, color-mix(in srgb, var(--forest) 80%, transparent) 0%, transparent 50%),
+    radial-gradient(ellipse 45% 35% at 10% 75%, color-mix(in srgb, var(--ink) 70%, transparent) 0%, transparent 45%),
+    var(--ink-deep);
+  transition: background 1.2s ease;
+}
+
+html[data-sky='day'] body {
+  background:
+    radial-gradient(ellipse 120% 75% at 50% -10%, #c47820 0%, transparent 52%),
+    radial-gradient(ellipse 55% 40% at 90% 90%, #5a3210 0%, transparent 48%),
+    radial-gradient(ellipse 40% 30% at 8% 70%, #3d220c 0%, transparent 42%),
+    var(--ink-deep);
+}
+
+#app {
+  height: 100dvh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  padding:
+    max(0.55rem, env(safe-area-inset-top))
+    max(1rem, env(safe-area-inset-right))
+    max(0.55rem, env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
+}
+
+.sky {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(110, 231, 183, 0.75);
+  animation: twinkle var(--dur, 3s) ease-in-out var(--delay, 0s) infinite;
+  transition: opacity 1s ease;
+}
+
+html[data-sky='day'] .star {
+  opacity: 0.08;
+  animation: none;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* Four fixed bands — brand · compass · readout · dock */
+.stage {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 26rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  justify-items: stretch;
+  row-gap: clamp(0.4rem, 1.2dvh, 0.8rem);
+  padding-inline: 0.15rem;
+}
+
+.brand {
+  text-align: center;
+  width: 100%;
+  min-height: 3.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.75rem, 6.5vw, 2.45rem);
+  letter-spacing: 0.05em;
+  line-height: 0.95;
+  color: var(--foam);
+  text-shadow: 0 0 28px var(--glow);
+}
+
+.brand p {
+  margin: 0.25rem 0 0;
+  font-weight: 300;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mist);
+  min-height: 1em;
+}
+
+.compass-wrap {
+  position: relative;
+  width: min(64vw, 32dvh, 16.5rem);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  justify-self: center;
+}
+
+.facing {
+  position: absolute;
+  top: -0.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  width: 0;
+  height: 0;
+  border-left: 0.5rem solid transparent;
+  border-right: 0.5rem solid transparent;
+  border-bottom: 0.8rem solid var(--emerald-bright);
+  filter: drop-shadow(0 0 10px var(--glow));
+}
+
+.compass {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 42%),
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--forest) 85%, #000) 0%, var(--ink-deep) 72%);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  box-shadow:
+    inset 0 0 36px rgba(0, 0, 0, 0.45),
+    0 0 40px color-mix(in srgb, var(--accent-deep) 18%, transparent),
+    0 16px 40px rgba(0, 0, 0, 0.35);
+  will-change: transform;
+  transform: translateZ(0);
+  transition: background 0.8s ease, border-color 0.8s ease, box-shadow 0.8s ease;
+}
+
+.ring {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.tick {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: 100%;
+  transform: translate(-50%, -50%) rotate(var(--a));
+  z-index: 1;
+}
+
+.tick::before {
+  content: "";
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: var(--h, 0.45rem);
+  background: color-mix(in srgb, var(--mist) 40%, transparent);
+  border-radius: 1px;
+}
+
+.tick.major::before {
+  height: 0.75rem;
+  background: color-mix(in srgb, var(--jade) 70%, transparent);
+}
+
+.label {
+  position: absolute;
+  inset: 7%;
+  transform: rotate(var(--a));
+  pointer-events: none;
+  z-index: 2;
+}
+
+.label span {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) rotate(calc(-1 * var(--a)));
+  font-size: clamp(0.65rem, 2.8vw, 0.75rem);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--mist);
+}
+
+.label.n span {
+  color: var(--jade);
+  font-weight: 600;
+}
+
+.body-orbit {
+  position: absolute;
+  inset: 12%;
+  transform: rotate(var(--body-a, 0deg));
+  will-change: transform;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.body-marker {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: clamp(2rem, 9vw, 2.55rem);
+  height: clamp(2rem, 9vw, 2.55rem);
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 45%, transparent));
+}
+
+.body-marker .disc {
+  --phase-x: 55%;
+  --phase-shade: 0.45;
+  --lit: 0.5;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 32%, #f2fff8, #c6f0d9 45%, #7bc9a4 100%);
+  box-shadow:
+    0 0 16px rgba(52, 211, 153, calc(0.3 + var(--lit) * 0.45)),
+    0 0 32px rgba(16, 185, 129, calc(0.12 + var(--lit) * 0.22));
+  position: relative;
+  overflow: hidden;
+  transition: background 0.6s ease, box-shadow 0.6s ease;
+}
+
+.body-marker .disc.sun {
+  background:
+    radial-gradient(circle at 38% 34%, #fff7d6, #fbbf24 42%, #d97706 100%);
+  box-shadow:
+    0 0 18px rgba(251, 191, 36, 0.65),
+    0 0 36px rgba(217, 119, 6, 0.4);
+}
+
+.body-marker .disc.nasa {
+  background:
+    var(--nasa-url) center / cover no-repeat,
+    radial-gradient(circle at 35% 32%, #f2fff8, #c6f0d9 45%, #7bc9a4 100%);
+  box-shadow:
+    0 0 14px rgba(236, 248, 255, calc(0.22 + var(--lit) * 0.35)),
+    0 0 28px rgba(16, 185, 129, calc(0.1 + var(--lit) * 0.2));
+}
+
+.body-marker .disc::after {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  border-radius: 50%;
+  background: rgba(2, 12, 9, 0.92);
+  transform: translateX(var(--phase-x));
+  opacity: var(--phase-shade);
+}
+
+.body-marker .disc.nasa::after,
+.body-marker .disc.sun::after {
+  display: none;
+}
+
+.hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.45rem;
+  height: 0.45rem;
+  margin: -0.225rem;
+  border-radius: 50%;
+  background: var(--jade);
+  box-shadow: 0 0 12px var(--glow);
+  z-index: 6;
+}
+
+/* Readout: portrait then copy — balanced in the free band */
+.readout {
+  width: 100%;
+  min-height: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  text-align: center;
+  overflow: hidden;
+  padding-inline: 0.25rem;
+}
+
+.readout-copy {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.18rem;
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+.readout .altitude {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 4.6vw, 1.55rem);
+  font-weight: 500;
+  font-style: italic;
+  margin: 0;
+  color: var(--foam);
+  line-height: 1.25;
+  width: 100%;
+  min-height: 1.35em;
+}
+
+.readout .meta,
+.readout .turn {
+  margin: 0;
+  font-size: clamp(0.76rem, 3.1vw, 0.86rem);
+  font-weight: 300;
+  color: var(--mist);
+  line-height: 1.35;
+  width: 100%;
+  max-width: 22rem;
+  min-height: 1.35em;
+}
+
+.readout .meta strong,
+.readout .turn strong {
+  color: var(--emerald-bright);
+  font-weight: 500;
+}
+
+.briefing {
+  margin: 0.25rem 0 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+  align-items: center;
+}
+
+.sky-portrait {
+  margin: 0;
+  width: 4.75rem;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.28rem;
+  position: relative;
+  z-index: 1;
+}
+
+.portrait-frame {
+  position: relative;
+  width: 4.75rem;
+  height: 4.75rem;
+  border-radius: 50%;
+  overflow: hidden;
+  flex: 0 0 auto;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent),
+    0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* Only show the active portrait medium — never override [hidden] */
+.sky-portrait img:not([hidden]),
+.sky-portrait .sun-disc:not([hidden]),
+.sky-portrait .moon-disc:not([hidden]) {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  animation: portrait-glow 6s ease-in-out infinite;
+}
+
+.sky-portrait img[hidden],
+.sky-portrait .sun-disc[hidden],
+.sky-portrait .moon-disc[hidden] {
+  display: none !important;
+}
+
+.sky-portrait .moon-disc:not([hidden]) {
+  --phase-x: 55%;
+  --phase-shade: 0.45;
+  --lit: 0.5;
+  background:
+    radial-gradient(circle at 35% 32%, #f2fff8, #c6f0d9 45%, #7bc9a4 100%);
+  box-shadow: inset 0 0 16px rgba(52, 211, 153, 0.2);
+  overflow: hidden;
+}
+
+.sky-portrait .moon-disc:not([hidden])::after {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  border-radius: 50%;
+  background: rgba(2, 12, 9, 0.92);
+  transform: translateX(var(--phase-x));
+  opacity: var(--phase-shade);
+}
+
+.sky-portrait .sun-disc:not([hidden]) {
+  background:
+    radial-gradient(circle at 36% 32%, #fff9e8 0%, #fde68a 28%, #f59e0b 62%, #b45309 100%);
+  box-shadow: inset 0 0 18px rgba(255, 247, 214, 0.25);
+  overflow: hidden;
+}
+
+.sky-portrait .sun-disc:not([hidden])::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-conic-gradient(from 0deg, rgba(255, 247, 214, 0.4) 0 5deg, transparent 5deg 16deg);
+  opacity: 0.35;
+  animation: sun-spin 48s linear infinite;
+}
+
+.sky-portrait .sun-disc:not([hidden])::after {
+  content: "";
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 38% 34%, #fff7d6, #fbbf24 50%, #d97706 100%);
+}
+
+.sky-portrait figcaption {
+  margin: 0;
+  width: 100%;
+  max-width: 12rem;
+  min-height: 1.25em;
+  font-size: 0.62rem;
+  font-weight: 300;
+  letter-spacing: 0.03em;
+  color: color-mix(in srgb, var(--mist) 85%, transparent);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+@keyframes portrait-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.06);
+  }
+}
+
+@keyframes sun-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.briefing .phase-line {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 3.5vw, 1.12rem);
+  font-weight: 500;
+  color: var(--foam);
+  line-height: 1.25;
+  width: 100%;
+  min-height: 1.35em;
+}
+
+.briefing .phase-line strong {
+  font-weight: 600;
+  color: var(--jade);
+}
+
+.briefing .visibility-line {
+  margin: 0;
+  font-size: clamp(0.72rem, 2.9vw, 0.82rem);
+  font-weight: 300;
+  color: var(--mist);
+  line-height: 1.35;
+  max-width: 21rem;
+  min-height: 1.35em;
+}
+
+.briefing[data-can-see='yes'] .visibility-line {
+  color: var(--ok);
+}
+
+.briefing[data-can-see='no'] .visibility-line {
+  color: var(--warn);
+}
+
+.briefing .timing-line {
+  margin: 0;
+  font-size: clamp(0.72rem, 2.8vw, 0.8rem);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--mist) 88%, transparent);
+  line-height: 1.35;
+  width: 100%;
+  min-height: 1.25em;
+}
+
+/* Dock: status slot always reserved */
+.dock {
+  width: 100%;
+  display: grid;
+  grid-template-rows: 1.15rem auto;
+  align-items: center;
+  gap: 0.4rem;
+  padding-top: 0.1rem;
+  background: linear-gradient(to top, color-mix(in srgb, var(--ink-deep) 92%, transparent) 55%, transparent);
+  z-index: 2;
+}
+
+.status {
+  margin: 0;
+  padding: 0 0.25rem;
+  font-size: 0.7rem;
+  line-height: 1.15rem;
+  text-align: center;
+  color: var(--warn);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status:empty::before {
+  content: "\00a0";
+}
+
+.status.ok {
+  color: var(--ok);
+}
+
+.actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.actions:empty,
+.actions:has(button[hidden]:only-child),
+.actions:not(:has(button:not([hidden]))) {
+  display: none;
+}
+
+button {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.8rem 1.1rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button.primary {
+  background: linear-gradient(180deg, var(--emerald-bright), var(--emerald));
+  color: var(--ink-deep);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent-deep) 30%, transparent);
+}
+
+button.ghost {
+  background: color-mix(in srgb, var(--ink-deep) 72%, transparent);
+  color: var(--mist);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: end center;
+  padding: 1.25rem;
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  background:
+    linear-gradient(to top, rgba(2, 12, 9, 0.96) 38%, rgba(3, 20, 15, 0.55) 100%);
+}
+
+.overlay[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+.sheet {
+  width: min(100%, 24rem);
+  text-align: center;
+  padding: 1.4rem 1.1rem 1.1rem;
+}
+
+.sheet h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 7vw, 2rem);
+  font-weight: 600;
+  color: var(--foam);
+}
+
+.sheet p {
+  margin: 0.65rem 0 1.15rem;
+  color: var(--mist);
+  font-weight: 300;
+  line-height: 1.45;
+  font-size: 0.95rem;
+}
+
+.compass-wrap.below-horizon .body-marker {
+  opacity: 0.35;
+}
+
+/* Tall phones (Pro Max class) */
+@media (min-height: 850px) {
+  .stage {
+    row-gap: clamp(0.5rem, 1.5dvh, 1rem);
+  }
+
+  .compass-wrap {
+    width: min(58vw, 30dvh, 17rem);
+  }
+
+  .sky-portrait,
+  .portrait-frame {
+    width: 5rem;
+  }
+
+  .portrait-frame {
+    height: 5rem;
+  }
+
+  .readout {
+    gap: 0.65rem;
+  }
+}
+
+/* Short / browser-chrome-heavy viewports */
+@media (max-height: 760px) {
+  .brand {
+    min-height: 2.6rem;
+  }
+
+  .brand h1 {
+    font-size: 1.65rem;
+  }
+
+  .brand p {
+    margin-top: 0.15rem;
+    font-size: 0.65rem;
+  }
+
+  .compass-wrap {
+    width: min(54vw, 28dvh, 14rem);
+  }
+
+  .sky-portrait,
+  .portrait-frame {
+    width: 4.1rem;
+  }
+
+  .portrait-frame {
+    height: 4.1rem;
+  }
+
+  .readout .altitude {
+    font-size: 1.1rem;
+  }
+
+  .briefing .phase-line {
+    font-size: 0.92rem;
+  }
+
+  button {
+    padding: 0.7rem 1rem;
+  }
+}
+
+@media (max-height: 680px) {
+  .compass-wrap {
+    width: min(48vw, 24dvh, 12rem);
+  }
+
+  .sky-portrait {
+    display: none;
+  }
+
+  .stage {
+    row-gap: 0.3rem;
+  }
+}
