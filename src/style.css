@@ -121,7 +121,7 @@ html[data-sky='day'] .star {
   }
 }
 
-/* Four bands: brand · compass · readout · dock — never overlap */
+/* Four fixed bands — brand · compass · readout · dock */
 .stage {
   position: relative;
   z-index: 1;
@@ -133,14 +133,19 @@ html[data-sky='day'] .star {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-items: center;
-  row-gap: clamp(0.35rem, 1.2dvh, 0.85rem);
+  justify-items: stretch;
+  row-gap: clamp(0.4rem, 1.2dvh, 0.8rem);
+  padding-inline: 0.15rem;
 }
 
 .brand {
   text-align: center;
-  flex-shrink: 0;
   width: 100%;
+  min-height: 3.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .brand h1 {
@@ -161,13 +166,14 @@ html[data-sky='day'] .star {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--mist);
+  min-height: 1em;
 }
 
 .compass-wrap {
   position: relative;
-  width: min(68vw, 34dvh, 17.5rem);
+  width: min(64vw, 32dvh, 16.5rem);
   aspect-ratio: 1;
-  margin: 0;
+  margin: 0 auto;
   justify-self: center;
 }
 
@@ -182,7 +188,7 @@ html[data-sky='day'] .star {
   border-left: 0.5rem solid transparent;
   border-right: 0.5rem solid transparent;
   border-bottom: 0.8rem solid var(--emerald-bright);
-  filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.55));
+  filter: drop-shadow(0 0 10px var(--glow));
 }
 
 .compass {
@@ -191,22 +197,23 @@ html[data-sky='day'] .star {
   height: 100%;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 50% 40%, rgba(52, 211, 153, 0.12), transparent 42%),
-    radial-gradient(circle at 50% 50%, #0d241c 0%, #071610 72%);
-  border: 1px solid rgba(52, 211, 153, 0.28);
+    radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 42%),
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--forest) 85%, #000) 0%, var(--ink-deep) 72%);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   box-shadow:
     inset 0 0 36px rgba(0, 0, 0, 0.45),
-    0 0 40px rgba(16, 185, 129, 0.12),
+    0 0 40px color-mix(in srgb, var(--accent-deep) 18%, transparent),
     0 16px 40px rgba(0, 0, 0, 0.35);
   will-change: transform;
   transform: translateZ(0);
+  transition: background 0.8s ease, border-color 0.8s ease, box-shadow 0.8s ease;
 }
 
 .ring {
   position: absolute;
   inset: 8%;
   border-radius: 50%;
-  border: 1px solid rgba(52, 211, 153, 0.14);
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
 .tick {
@@ -226,13 +233,13 @@ html[data-sky='day'] .star {
   transform: translateX(-50%);
   width: 2px;
   height: var(--h, 0.45rem);
-  background: rgba(157, 205, 184, 0.35);
+  background: color-mix(in srgb, var(--mist) 40%, transparent);
   border-radius: 1px;
 }
 
 .tick.major::before {
   height: 0.75rem;
-  background: rgba(110, 231, 183, 0.65);
+  background: color-mix(in srgb, var(--jade) 70%, transparent);
 }
 
 .label {
@@ -333,73 +340,92 @@ html[data-sky='day'] .star {
   margin: -0.225rem;
   border-radius: 50%;
   background: var(--jade);
-  box-shadow: 0 0 12px rgba(52, 211, 153, 0.55);
+  box-shadow: 0 0 12px var(--glow);
 }
 
+/* Readout: fixed vertical stack — same slots day & night */
 .readout {
   width: 100%;
   min-height: 0;
   align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(0.35rem, 1.1dvh, 0.7rem);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-content: start;
+  justify-items: center;
+  gap: 0.45rem;
   text-align: center;
   overflow: hidden;
+  padding-inline: 0.25rem;
 }
 
 .readout-copy {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
+  display: grid;
+  grid-template-rows: 1.35em 1.4em 1.4em auto;
+  align-items: start;
+  justify-items: center;
+  gap: 0.12rem;
 }
 
 .readout .altitude {
   font-family: var(--font-display);
-  font-size: clamp(1.2rem, 4.8vw, 1.65rem);
+  font-size: clamp(1.15rem, 4.6vw, 1.55rem);
   font-weight: 500;
   font-style: italic;
   margin: 0;
   color: var(--foam);
-  line-height: 1.15;
+  line-height: 1.2;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.readout .meta {
+.readout .meta,
+.readout .turn {
   margin: 0;
-  font-size: clamp(0.78rem, 3.2vw, 0.88rem);
+  font-size: clamp(0.76rem, 3.1vw, 0.86rem);
   font-weight: 300;
   color: var(--mist);
   line-height: 1.35;
+  width: 100%;
+  max-width: 22rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.readout .meta strong {
+.readout .meta strong,
+.readout .turn strong {
   color: var(--emerald-bright);
   font-weight: 500;
 }
 
 .briefing {
-  margin: 0.15rem 0 0;
+  margin: 0.2rem 0 0;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 0.18rem;
+  display: grid;
+  grid-template-rows: 1.35em minmax(2.4em, auto) 1.35em;
+  gap: 0.14rem;
   width: 100%;
+  align-items: center;
+  justify-items: center;
 }
 
 .sky-portrait {
   margin: 0;
-  width: min(28vw, 5.25rem);
-  max-width: 88px;
+  width: 5rem;
   flex-shrink: 0;
+  display: grid;
+  grid-template-rows: 5rem 1.5em;
+  justify-items: center;
+  gap: 0.2rem;
 }
 
 .portrait-frame {
   position: relative;
-  width: 100%;
-  aspect-ratio: 1;
+  width: 5rem;
+  height: 5rem;
 }
 
 .sky-portrait img,
@@ -407,14 +433,19 @@ html[data-sky='day'] .star {
   display: block;
   width: 100%;
   height: 100%;
-  aspect-ratio: 1;
   border-radius: 50%;
-  background: rgba(2, 12, 9, 0.55);
+  background: color-mix(in srgb, var(--ink) 70%, transparent);
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent),
     0 6px 20px rgba(0, 0, 0, 0.4),
     0 0 28px color-mix(in srgb, var(--mist) 20%, transparent);
   animation: portrait-glow 6s ease-in-out infinite;
+}
+
+.sky-portrait:not(.ready) .portrait-frame {
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mist) 22%, transparent);
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
 }
 
 .sky-portrait .sun-disc {
@@ -448,12 +479,18 @@ html[data-sky='day'] .star {
 }
 
 .sky-portrait figcaption {
-  margin-top: 0.28rem;
-  font-size: clamp(0.58rem, 2.4vw, 0.66rem);
+  margin: 0;
+  width: 100%;
+  max-width: 11rem;
+  font-size: 0.62rem;
   font-weight: 300;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   color: color-mix(in srgb, var(--mist) 85%, transparent);
   line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
 }
 
 @keyframes portrait-glow {
@@ -475,10 +512,14 @@ html[data-sky='day'] .star {
 .briefing .phase-line {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(0.98rem, 3.6vw, 1.18rem);
+  font-size: clamp(0.95rem, 3.5vw, 1.12rem);
   font-weight: 500;
   color: var(--foam);
-  line-height: 1.2;
+  line-height: 1.25;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .briefing .phase-line strong {
@@ -488,13 +529,15 @@ html[data-sky='day'] .star {
 
 .briefing .visibility-line {
   margin: 0;
-  font-size: clamp(0.74rem, 3vw, 0.84rem);
+  font-size: clamp(0.72rem, 2.9vw, 0.82rem);
   font-weight: 300;
   color: var(--mist);
   line-height: 1.3;
   max-width: 21rem;
-  margin-left: auto;
-  margin-right: auto;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .briefing[data-can-see='yes'] .visibility-line {
@@ -507,36 +550,43 @@ html[data-sky='day'] .star {
 
 .briefing .timing-line {
   margin: 0;
-  font-size: clamp(0.66rem, 2.6vw, 0.74rem);
+  font-size: clamp(0.64rem, 2.5vw, 0.72rem);
   font-weight: 300;
   letter-spacing: 0.02em;
-  color: rgba(157, 205, 184, 0.82);
+  color: color-mix(in srgb, var(--mist) 88%, transparent);
   line-height: 1.3;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* Dock: status slot always reserved */
 .dock {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.45rem;
-  padding-top: 0.15rem;
-  background: linear-gradient(to top, rgba(2, 12, 9, 0.92) 55%, transparent);
+  display: grid;
+  grid-template-rows: 1.15rem auto;
+  align-items: center;
+  gap: 0.4rem;
+  padding-top: 0.1rem;
+  background: linear-gradient(to top, color-mix(in srgb, var(--ink-deep) 92%, transparent) 55%, transparent);
   z-index: 2;
 }
 
 .status {
-  min-height: 1.05rem;
   margin: 0;
   padding: 0 0.25rem;
-  font-size: 0.72rem;
-  line-height: 1.3;
+  font-size: 0.7rem;
+  line-height: 1.15rem;
   text-align: center;
   color: var(--warn);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.status:empty {
-  display: none;
+.status:empty::before {
+  content: "\00a0";
 }
 
 .status.ok {
@@ -553,10 +603,6 @@ html[data-sky='day'] .star {
 .actions:empty,
 .actions:has(button[hidden]:only-child),
 .actions:not(:has(button:not([hidden]))) {
-  display: none;
-}
-
-.dock:has(.actions:not(:has(button:not([hidden])))) .status:empty {
   display: none;
 }
 
@@ -581,13 +627,13 @@ button:active {
 button.primary {
   background: linear-gradient(180deg, var(--emerald-bright), var(--emerald));
   color: var(--ink-deep);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.28);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent-deep) 30%, transparent);
 }
 
 button.ghost {
-  background: rgba(2, 12, 9, 0.72);
+  background: color-mix(in srgb, var(--ink-deep) 72%, transparent);
   color: var(--mist);
-  border: 1px solid rgba(52, 211, 153, 0.28);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
   backdrop-filter: blur(8px);
 }
 
@@ -640,25 +686,37 @@ button:disabled {
   opacity: 0.35;
 }
 
+/* Tall phones (Pro Max class) */
 @media (min-height: 850px) {
   .stage {
-    row-gap: clamp(0.55rem, 1.6dvh, 1.1rem);
+    row-gap: clamp(0.5rem, 1.5dvh, 1rem);
   }
 
   .compass-wrap {
-    width: min(62vw, 32dvh, 18rem);
+    width: min(58vw, 30dvh, 17rem);
   }
 
   .sky-portrait {
-    width: min(26vw, 5.5rem);
+    width: 5.25rem;
+    grid-template-rows: 5.25rem 1.5em;
+  }
+
+  .portrait-frame {
+    width: 5.25rem;
+    height: 5.25rem;
   }
 
   .readout {
-    gap: clamp(0.45rem, 1.4dvh, 0.85rem);
+    gap: 0.55rem;
   }
 }
 
+/* Short / browser-chrome-heavy viewports */
 @media (max-height: 760px) {
+  .brand {
+    min-height: 2.6rem;
+  }
+
   .brand h1 {
     font-size: 1.65rem;
   }
@@ -669,23 +727,25 @@ button:disabled {
   }
 
   .compass-wrap {
-    width: min(58vw, 30dvh, 14.5rem);
+    width: min(54vw, 28dvh, 14rem);
   }
 
   .sky-portrait {
-    width: min(22vw, 4.4rem);
+    width: 4.4rem;
+    grid-template-rows: 4.4rem 1.35em;
   }
 
-  .sky-portrait figcaption {
-    margin-top: 0.18rem;
+  .portrait-frame {
+    width: 4.4rem;
+    height: 4.4rem;
   }
 
   .readout .altitude {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
   }
 
   .briefing .phase-line {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
   }
 
   button {
@@ -695,11 +755,15 @@ button:disabled {
 
 @media (max-height: 680px) {
   .compass-wrap {
-    width: min(50vw, 26dvh, 12.5rem);
+    width: min(48vw, 24dvh, 12rem);
   }
 
   .sky-portrait {
     display: none;
+  }
+
+  .readout {
+    grid-template-rows: 1fr;
   }
 
   .stage {
