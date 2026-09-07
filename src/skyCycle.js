@@ -103,10 +103,11 @@ export function describeSunVisibility(altitude) {
 }
 
 export function formatSunCaption(date = new Date()) {
-  return `Solar disc · ${date.toLocaleString(undefined, {
+  const stamp = date.toLocaleString(undefined, {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-  })}`
+  })
+  return `Solar disc · ${stamp}`
 }
