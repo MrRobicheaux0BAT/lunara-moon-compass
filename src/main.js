@@ -5,6 +5,7 @@ import {
   getMoonTimes,
   getPosition as getSunPosition,
 } from 'suncalc'
+import { nasaDialAMoonUrl, nasaDialCaption, nasaDialHour } from './nasaMoon.js'
 
 const app = document.querySelector('#app')
 
@@ -48,6 +49,10 @@ app.innerHTML = `
     </section>
 
     <section class="readout" aria-live="polite">
+      <figure class="nasa-moon" id="nasaMoon" hidden>
+        <img id="nasaMoonImg" alt="NASA Dial-A-Moon for the current UTC hour" width="730" height="730" decoding="async" />
+        <figcaption id="nasaMoonCap">NASA Dial-A-Moon</figcaption>
+      </figure>
       <p class="altitude" id="altitude">Finding the moon…</p>
       <p class="meta" id="meta">Tap Start to begin</p>
       <div class="briefing" id="briefing" hidden>
@@ -85,6 +90,9 @@ const moonDisc = document.getElementById('moonDisc')
 const altitudeEl = document.getElementById('altitude')
 const metaEl = document.getElementById('meta')
 const briefingEl = document.getElementById('briefing')
+const nasaMoonEl = document.getElementById('nasaMoon')
+const nasaMoonImg = document.getElementById('nasaMoonImg')
+const nasaMoonCap = document.getElementById('nasaMoonCap')
 const phaseLine = document.getElementById('phaseLine')
 const visibilityLine = document.getElementById('visibilityLine')
 const timingLine = document.getElementById('timingLine')
@@ -94,6 +102,42 @@ const recalibrateBtn = document.getElementById('recalibrateBtn')
 const overlay = document.getElementById('overlay')
 const overlayBtn = document.getElementById('overlayBtn')
 const overlayCopy = document.getElementById('overlayCopy')
+
+let lastNasaHourKey = null
+
+function paintNasaMoon(date = new Date()) {
+  const hour = nasaDialHour(date)
+  const key = hour.toISOString()
+  if (key === lastNasaHourKey) return
+
+  const url = nasaDialAMoonUrl(hour)
+  if (!url) {
+    nasaMoonEl.hidden = true
+    moonDisc.classList.remove('nasa')
+    moonDisc.style.removeProperty('--nasa-url')
+    return
+  }
+
+  lastNasaHourKey = key
+  nasaMoonCap.textContent = nasaDialCaption(hour)
+
+  const apply = () => {
+    nasaMoonImg.src = url
+    nasaMoonEl.hidden = false
+    moonDisc.classList.add('nasa')
+    moonDisc.style.setProperty('--nasa-url', `url("${url}")`)
+  }
+
+  const probe = new Image()
+  probe.onload = apply
+  probe.onerror = () => {
+    nasaMoonEl.hidden = true
+    moonDisc.classList.remove('nasa')
+    moonDisc.style.removeProperty('--nasa-url')
+    lastNasaHourKey = null
+  }
+  probe.src = url
+}
 
 function seedStars() {
   const frag = document.createDocumentFragment()
@@ -284,6 +328,7 @@ function updateMoon() {
   })
 
   paintPhaseDisc(illum.phase, illum.fraction)
+  paintNasaMoon(now)
 
   const below = state.moonAltitude < 0
   compassWrap.classList.toggle('below-horizon', below)
@@ -487,6 +532,7 @@ recalibrateBtn.addEventListener('click', () => {
 })
 
 setInterval(updateMoon, 5_000)
+paintNasaMoon()
 
 if (!window.isSecureContext) {
   setStatus('Needs HTTPS for sensors.')
