@@ -56,20 +56,21 @@ app.innerHTML = `
     </section>
 
     <section class="readout" aria-live="polite">
-      <figure class="sky-portrait" id="skyPortrait" hidden>
+      <figure class="sky-portrait" id="skyPortrait">
         <div class="portrait-frame" id="portraitFrame">
           <img id="nasaMoonImg" alt="" width="730" height="730" decoding="async" hidden />
           <div class="sun-disc" id="sunPortrait" hidden aria-hidden="true"></div>
         </div>
-        <figcaption id="portraitCap">Sky</figcaption>
+        <figcaption id="portraitCap">Waiting for sky…</figcaption>
       </figure>
       <div class="readout-copy">
         <p class="altitude" id="altitude">Finding the sky…</p>
         <p class="meta" id="meta">Tap Start to begin</p>
-        <div class="briefing" id="briefing" hidden>
-          <p class="phase-line" id="phaseLine"></p>
-          <p class="visibility-line" id="visibilityLine"></p>
-          <p class="timing-line" id="timingLine"></p>
+        <p class="turn" id="turnLine">Hold phone flat for turn hints</p>
+        <div class="briefing" id="briefing">
+          <p class="phase-line" id="phaseLine">—</p>
+          <p class="visibility-line" id="visibilityLine">Enable sensors to track the sky</p>
+          <p class="timing-line" id="timingLine">—</p>
         </div>
       </div>
     </section>
@@ -103,6 +104,7 @@ const bodyDisc = document.getElementById('bodyDisc')
 const brandTag = document.getElementById('brandTag')
 const altitudeEl = document.getElementById('altitude')
 const metaEl = document.getElementById('meta')
+const turnLine = document.getElementById('turnLine')
 const briefingEl = document.getElementById('briefing')
 const skyPortrait = document.getElementById('skyPortrait')
 const nasaMoonImg = document.getElementById('nasaMoonImg')
@@ -283,12 +285,12 @@ function showOverlay(message) {
 
 function paintMeta() {
   const base = metaEl.dataset.base
-  if (!base) return
+  if (base) metaEl.innerHTML = base
   if (state.smoothHeading == null || state.targetAzimuth == null) {
-    metaEl.innerHTML = base
+    turnLine.innerHTML = 'Hold phone flat for turn hints'
     return
   }
-  metaEl.innerHTML = `${base}<br>Turn <strong>${formatTurn(state.targetAzimuth - state.smoothHeading)}</strong> to face it`
+  turnLine.innerHTML = `Turn <strong>${formatTurn(state.targetAzimuth - state.smoothHeading)}</strong> to face it`
 }
 
 function paintPhaseDisc(phase, fraction) {
@@ -310,7 +312,8 @@ function applyTheme(body, chapter) {
   compassWrap.dataset.body = body
   bodyDisc.classList.toggle('sun', body === 'sun')
   bodyDisc.classList.toggle('moon', body === 'moon')
-  brandTag.textContent = body === 'sun' ? 'Sun compass' : 'Moon compass'
+  // Keep brand line length stable so the header never reflows
+  brandTag.textContent = 'Sun & moon compass'
 
   const theme = document.querySelector('meta[name="theme-color"]')
   if (theme) theme.setAttribute('content', skyMode === 'day' ? '#120c05' : '#03140f')
@@ -363,12 +366,12 @@ function paintSunPortrait(date = new Date()) {
   bodyDisc.classList.remove('nasa')
   bodyDisc.style.removeProperty('--nasa-url')
   portraitCap.textContent = formatSunCaption(date)
-  skyPortrait.hidden = false
+  skyPortrait.classList.add('ready')
 }
 
 function paintMoonPortrait(date = new Date()) {
   sunPortrait.hidden = true
-  skyPortrait.hidden = false
+  skyPortrait.classList.add('ready')
   paintNasaMoon(date)
 }
 
@@ -387,6 +390,7 @@ function updateSky() {
     state.targetAltitude = sun.altitude
 
     paintSunPortrait(now)
+    // Full "lit" sun disc on the compass marker
     bodyDisc.style.setProperty('--phase-x', '120%')
     bodyDisc.style.setProperty('--phase-shade', '0')
     bodyDisc.style.setProperty('--lit', '1')
@@ -402,7 +406,7 @@ function updateSky() {
     paintMeta()
 
     const visibility = describeSunVisibility(state.targetAltitude)
-    phaseLine.innerHTML = `<strong>${cycle.label}</strong>`
+    phaseLine.innerHTML = `<strong>${cycle.label}</strong> · sun`
     visibilityLine.textContent = visibility.summary
 
     const rise = cycle.times.sunrise ? formatClock(cycle.times.sunrise) : '—'
@@ -410,11 +414,11 @@ function updateSky() {
     const noon = cycle.times.solarNoon ? formatClock(cycle.times.solarNoon) : '—'
     timingLine.textContent = `Sunrise ${rise} · Noon ${noon} · Sunset ${set}`
 
-    briefingEl.hidden = false
     briefingEl.dataset.canSee = visibility.canSee ? 'yes' : 'no'
     return
   }
 
+  // Night — moon
   const pos = getMoonPosition(now, state.lat, state.lng)
   const illum = getMoonIllumination(now)
   const moonTimes = getMoonTimes(now, state.lat, state.lng)
@@ -460,7 +464,6 @@ function updateSky() {
   const sunSet = cycle.times.sunset ? formatClock(cycle.times.sunset) : '—'
   timingLine.textContent = `Moonrise ${rise} · Moonset ${set} · Sun ${sunRise}–${sunSet}`
 
-  briefingEl.hidden = false
   briefingEl.dataset.canSee = visibility.canSee ? 'yes' : 'no'
 }
 
@@ -471,6 +474,7 @@ function applyLocation(pos) {
   updateSky()
 }
 
+/** Must run from a tap before other permission dialogs (iOS). */
 async function requestOrientationPermission() {
   if (
     typeof DeviceOrientationEvent !== 'undefined' &&
