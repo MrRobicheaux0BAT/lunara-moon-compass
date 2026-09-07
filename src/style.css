@@ -10,9 +10,33 @@
   --foam: #e8faf2;
   --warn: #e8c47a;
   --ok: #6ee7b7;
+  --accent: #34d399;
+  --accent-deep: #10b981;
+  --glow: rgba(16, 185, 129, 0.28);
+  --sky-wash: #0f3d2e;
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: "Outfit", system-ui, sans-serif;
   --pad: max(0.85rem, env(safe-area-inset-top));
+}
+
+/* Day cycle — warm sun palette (keeps brand, shifts atmosphere) */
+html[data-sky='day'] {
+  --ink: #1a1208;
+  --ink-deep: #120c05;
+  --forest: #3a2810;
+  --emerald: #d97706;
+  --emerald-bright: #fbbf24;
+  --emerald-deep: #b45309;
+  --jade: #fcd34d;
+  --mist: #d6c4a0;
+  --foam: #fff8eb;
+  --warn: #f59e0b;
+  --ok: #84cc16;
+  --accent: #fbbf24;
+  --accent-deep: #d97706;
+  --glow: rgba(251, 191, 36, 0.32);
+  --sky-wash: #5c3d12;
+  color-scheme: dark;
 }
 
 *,
@@ -37,9 +61,18 @@ body {
 
 body {
   background:
-    radial-gradient(ellipse 110% 70% at 50% -15%, #0f3d2e 0%, transparent 55%),
-    radial-gradient(ellipse 60% 45% at 85% 95%, #0a2f24 0%, transparent 50%),
-    radial-gradient(ellipse 45% 35% at 10% 75%, #06281d 0%, transparent 45%),
+    radial-gradient(ellipse 110% 70% at 50% -15%, var(--sky-wash) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 45% at 85% 95%, color-mix(in srgb, var(--forest) 80%, transparent) 0%, transparent 50%),
+    radial-gradient(ellipse 45% 35% at 10% 75%, color-mix(in srgb, var(--ink) 70%, transparent) 0%, transparent 45%),
+    var(--ink-deep);
+  transition: background 1.2s ease;
+}
+
+html[data-sky='day'] body {
+  background:
+    radial-gradient(ellipse 120% 75% at 50% -10%, #c47820 0%, transparent 52%),
+    radial-gradient(ellipse 55% 40% at 90% 90%, #5a3210 0%, transparent 48%),
+    radial-gradient(ellipse 40% 30% at 8% 70%, #3d220c 0%, transparent 42%),
     var(--ink-deep);
 }
 
@@ -70,6 +103,12 @@ body {
   border-radius: 50%;
   background: rgba(110, 231, 183, 0.75);
   animation: twinkle var(--dur, 3s) ease-in-out var(--delay, 0s) infinite;
+  transition: opacity 1s ease;
+}
+
+html[data-sky='day'] .star {
+  opacity: 0.08;
+  animation: none;
 }
 
 @keyframes twinkle {
@@ -82,6 +121,7 @@ body {
   }
 }
 
+/* Four bands: brand · compass · readout · dock — never overlap */
 .stage {
   position: relative;
   z-index: 1;
@@ -100,6 +140,7 @@ body {
 .brand {
   text-align: center;
   flex-shrink: 0;
+  width: 100%;
 }
 
 .brand h1 {
@@ -110,7 +151,7 @@ body {
   letter-spacing: 0.05em;
   line-height: 0.95;
   color: var(--foam);
-  text-shadow: 0 0 28px rgba(16, 185, 129, 0.28);
+  text-shadow: 0 0 28px var(--glow);
 }
 
 .brand p {
@@ -124,12 +165,10 @@ body {
 
 .compass-wrap {
   position: relative;
-  /* Scales to phone height so readout + actions still fit */
   width: min(68vw, 34dvh, 17.5rem);
-  justify-self: center;
   aspect-ratio: 1;
-  flex-shrink: 0;
   margin: 0;
+  justify-self: center;
 }
 
 .facing {
@@ -219,24 +258,24 @@ body {
   font-weight: 600;
 }
 
-.moon-orbit {
+.body-orbit {
   position: absolute;
   inset: 14%;
-  transform: rotate(var(--moon-a, 0deg));
+  transform: rotate(var(--body-a, 0deg));
   will-change: transform;
   pointer-events: none;
 }
 
-.moon-marker {
+.body-marker {
   position: absolute;
   top: 0;
   left: 50%;
-  width: clamp(1.7rem, 8vw, 2.2rem);
-  height: clamp(1.7rem, 8vw, 2.2rem);
+  width: clamp(1.55rem, 7vw, 2rem);
+  height: clamp(1.55rem, 7vw, 2rem);
   transform: translate(-50%, -50%);
 }
 
-.moon-marker .disc {
+.body-marker .disc {
   --phase-x: 55%;
   --phase-shade: 0.45;
   --lit: 0.5;
@@ -250,9 +289,18 @@ body {
     0 0 32px rgba(16, 185, 129, calc(0.12 + var(--lit) * 0.22));
   position: relative;
   overflow: hidden;
+  transition: background 0.6s ease, box-shadow 0.6s ease;
 }
 
-.moon-marker .disc.nasa {
+.body-marker .disc.sun {
+  background:
+    radial-gradient(circle at 38% 34%, #fff7d6, #fbbf24 42%, #d97706 100%);
+  box-shadow:
+    0 0 18px rgba(251, 191, 36, 0.65),
+    0 0 36px rgba(217, 119, 6, 0.4);
+}
+
+.body-marker .disc.nasa {
   background:
     var(--nasa-url) center / cover no-repeat,
     radial-gradient(circle at 35% 32%, #f2fff8, #c6f0d9 45%, #7bc9a4 100%);
@@ -261,7 +309,7 @@ body {
     0 0 28px rgba(16, 185, 129, calc(0.1 + var(--lit) * 0.2));
 }
 
-.moon-marker .disc::after {
+.body-marker .disc::after {
   content: "";
   position: absolute;
   inset: -25%;
@@ -270,10 +318,11 @@ body {
   transform: translateX(var(--phase-x));
   opacity: var(--phase-shade);
 }
-.moon-marker .disc.nasa::after {
+
+.body-marker .disc.nasa::after,
+.body-marker .disc.sun::after {
   display: none;
 }
-
 
 .hub {
   position: absolute;
@@ -310,19 +359,20 @@ body {
 
 .readout .altitude {
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 5.5vw, 1.9rem);
+  font-size: clamp(1.2rem, 4.8vw, 1.65rem);
   font-weight: 500;
   font-style: italic;
   margin: 0;
   color: var(--foam);
+  line-height: 1.15;
 }
 
 .readout .meta {
-  margin: 0.3rem 0 0;
-  font-size: clamp(0.8rem, 3.4vw, 0.9rem);
+  margin: 0;
+  font-size: clamp(0.78rem, 3.2vw, 0.88rem);
   font-weight: 300;
   color: var(--mist);
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 .readout .meta strong {
@@ -339,36 +389,74 @@ body {
   width: 100%;
 }
 
-.nasa-moon {
+.sky-portrait {
   margin: 0;
   width: min(28vw, 5.25rem);
   max-width: 88px;
   flex-shrink: 0;
 }
 
-.nasa-moon img {
+.portrait-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.sky-portrait img,
+.sky-portrait .sun-disc {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   aspect-ratio: 1;
   border-radius: 50%;
   background: rgba(2, 12, 9, 0.55);
   box-shadow:
-    0 0 0 1px rgba(52, 211, 153, 0.22),
-    0 8px 28px rgba(0, 0, 0, 0.45),
-    0 0 36px rgba(157, 205, 184, 0.12);
-  animation: nasa-glow 6s ease-in-out infinite;
+    0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent),
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    0 0 28px color-mix(in srgb, var(--mist) 20%, transparent);
+  animation: portrait-glow 6s ease-in-out infinite;
 }
 
-.nasa-moon figcaption {
-  margin-top: 0.35rem;
-  font-size: clamp(0.62rem, 2.6vw, 0.7rem);
+.sky-portrait .sun-disc {
+  background:
+    radial-gradient(circle at 36% 32%, #fff9e8 0%, #fde68a 28%, #f59e0b 62%, #b45309 100%);
+  box-shadow:
+    0 0 0 1px rgba(251, 191, 36, 0.35),
+    0 0 24px rgba(251, 191, 36, 0.45),
+    0 8px 28px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.sky-portrait .sun-disc::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  background:
+    repeating-conic-gradient(from 0deg, rgba(255, 247, 214, 0.55) 0 6deg, transparent 6deg 18deg);
+  opacity: 0.45;
+  animation: sun-spin 48s linear infinite;
+}
+
+.sky-portrait .sun-disc::after {
+  content: "";
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 38% 34%, #fff7d6, #fbbf24 50%, #d97706 100%);
+}
+
+.sky-portrait figcaption {
+  margin-top: 0.28rem;
+  font-size: clamp(0.58rem, 2.4vw, 0.66rem);
   font-weight: 300;
   letter-spacing: 0.04em;
-  color: rgba(157, 205, 184, 0.72);
+  color: color-mix(in srgb, var(--mist) 85%, transparent);
+  line-height: 1.25;
 }
 
-@keyframes nasa-glow {
+@keyframes portrait-glow {
   0%,
   100% {
     filter: brightness(1);
@@ -378,12 +466,19 @@ body {
   }
 }
 
+@keyframes sun-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .briefing .phase-line {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.05rem, 4vw, 1.3rem);
+  font-size: clamp(0.98rem, 3.6vw, 1.18rem);
   font-weight: 500;
   color: var(--foam);
+  line-height: 1.2;
 }
 
 .briefing .phase-line strong {
@@ -392,12 +487,12 @@ body {
 }
 
 .briefing .visibility-line {
-  margin: 0.28rem 0 0;
-  font-size: clamp(0.8rem, 3.3vw, 0.9rem);
+  margin: 0;
+  font-size: clamp(0.74rem, 3vw, 0.84rem);
   font-weight: 300;
   color: var(--mist);
-  line-height: 1.35;
-  max-width: 22rem;
+  line-height: 1.3;
+  max-width: 21rem;
   margin-left: auto;
   margin-right: auto;
 }
@@ -411,11 +506,12 @@ body {
 }
 
 .briefing .timing-line {
-  margin: 0.35rem 0 0;
-  font-size: clamp(0.7rem, 2.9vw, 0.78rem);
+  margin: 0;
+  font-size: clamp(0.66rem, 2.6vw, 0.74rem);
   font-weight: 300;
   letter-spacing: 0.02em;
   color: rgba(157, 205, 184, 0.82);
+  line-height: 1.3;
 }
 
 .dock {
@@ -468,12 +564,14 @@ button {
   appearance: none;
   border: 0;
   border-radius: 999px;
-  padding: 0.85rem 1.15rem;
+  padding: 0.8rem 1.1rem;
   font-family: var(--font-body);
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 500;
   letter-spacing: 0.04em;
   cursor: pointer;
+  position: relative;
+  z-index: 1;
 }
 
 button:active {
@@ -538,10 +636,9 @@ button:disabled {
   font-size: 0.95rem;
 }
 
-.compass-wrap.below-horizon .moon-marker {
+.compass-wrap.below-horizon .body-marker {
   opacity: 0.35;
 }
-
 
 @media (min-height: 850px) {
   .stage {
@@ -552,7 +649,7 @@ button:disabled {
     width: min(62vw, 32dvh, 18rem);
   }
 
-  .nasa-moon {
+  .sky-portrait {
     width: min(26vw, 5.5rem);
   }
 
@@ -561,40 +658,51 @@ button:disabled {
   }
 }
 
-/* Very short phones */
-@media (max-height: 700px) {
+@media (max-height: 760px) {
   .brand h1 {
-    font-size: 1.85rem;
+    font-size: 1.65rem;
   }
 
   .brand p {
-    margin-top: 0.2rem;
-    font-size: 0.7rem;
+    margin-top: 0.15rem;
+    font-size: 0.65rem;
   }
 
   .compass-wrap {
-    width: min(62vw, 36dvh, 15.5rem);
+    width: min(58vw, 30dvh, 14.5rem);
+  }
+
+  .sky-portrait {
+    width: min(22vw, 4.4rem);
+  }
+
+  .sky-portrait figcaption {
+    margin-top: 0.18rem;
   }
 
   .readout .altitude {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
   }
 
-  .briefing {
-    margin-top: 0.35rem;
+  .briefing .phase-line {
+    font-size: 0.95rem;
   }
 
   button {
-    padding: 0.75rem 1rem;
+    padding: 0.7rem 1rem;
   }
 }
 
-@media (max-height: 620px) {
+@media (max-height: 680px) {
   .compass-wrap {
-    width: min(54vw, 32dvh, 13.5rem);
+    width: min(50vw, 26dvh, 12.5rem);
+  }
+
+  .sky-portrait {
+    display: none;
   }
 
   .stage {
-    gap: 0.35rem;
+    row-gap: 0.3rem;
   }
 }
