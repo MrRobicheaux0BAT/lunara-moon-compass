@@ -53,20 +53,24 @@ app.innerHTML = `
         <img id="nasaMoonImg" alt="NASA Dial-A-Moon for the current UTC hour" width="730" height="730" decoding="async" />
         <figcaption id="nasaMoonCap">NASA Dial-A-Moon</figcaption>
       </figure>
-      <p class="altitude" id="altitude">Finding the moon…</p>
-      <p class="meta" id="meta">Tap Start to begin</p>
-      <div class="briefing" id="briefing" hidden>
-        <p class="phase-line" id="phaseLine"></p>
-        <p class="visibility-line" id="visibilityLine"></p>
-        <p class="timing-line" id="timingLine"></p>
+      <div class="readout-copy">
+        <p class="altitude" id="altitude">Finding the moon…</p>
+        <p class="meta" id="meta">Tap Start to begin</p>
+        <div class="briefing" id="briefing" hidden>
+          <p class="phase-line" id="phaseLine"></p>
+          <p class="visibility-line" id="visibilityLine"></p>
+          <p class="timing-line" id="timingLine"></p>
+        </div>
       </div>
-      <p class="status" id="status"></p>
     </section>
 
-    <div class="actions">
+    <footer class="dock">
+      <p class="status" id="status"></p>
+      <div class="actions">
       <button class="primary" id="enableBtn" type="button">Enable sensors</button>
       <button class="ghost" id="recalibrateBtn" type="button" hidden>Recalibrate compass</button>
     </div>
+    </footer>
   </main>
 
   <div class="overlay" id="overlay">
@@ -267,9 +271,22 @@ function describeVisibility({ altitude, lit, sunAltitude, name }) {
   }
 }
 
+let statusClearTimer = null
+
 function setStatus(message, ok = false) {
-  statusEl.textContent = message
+  if (statusClearTimer) {
+    clearTimeout(statusClearTimer)
+    statusClearTimer = null
+  }
+  statusEl.textContent = message || ''
   statusEl.classList.toggle('ok', ok)
+  if (ok && message) {
+    statusClearTimer = setTimeout(() => {
+      statusEl.textContent = ''
+      statusEl.classList.remove('ok')
+      statusClearTimer = null
+    }, 3200)
+  }
 }
 
 function hideOverlay() {
