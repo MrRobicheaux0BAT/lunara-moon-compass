@@ -251,6 +251,15 @@ body {
   overflow: hidden;
 }
 
+.moon-marker .disc.nasa {
+  background:
+    var(--nasa-url) center / cover no-repeat,
+    radial-gradient(circle at 35% 32%, #f2fff8, #c6f0d9 45%, #7bc9a4 100%);
+  box-shadow:
+    0 0 14px rgba(236, 248, 255, calc(0.22 + var(--lit) * 0.35)),
+    0 0 28px rgba(16, 185, 129, calc(0.1 + var(--lit) * 0.2));
+}
+
 .moon-marker .disc::after {
   content: "";
   position: absolute;
@@ -260,6 +269,10 @@ body {
   transform: translateX(var(--phase-x));
   opacity: var(--phase-shade);
 }
+.moon-marker .disc.nasa::after {
+  display: none;
+}
+
 
 .hub {
   position: absolute;
@@ -305,6 +318,45 @@ body {
 .briefing {
   margin-top: 0.55rem;
   text-align: center;
+}
+
+.nasa-moon {
+  margin: 0 auto 0.45rem;
+  width: min(38vw, 6.75rem);
+  max-width: 108px;
+  flex-shrink: 0;
+}
+
+.nasa-moon img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(2, 12, 9, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(52, 211, 153, 0.22),
+    0 8px 28px rgba(0, 0, 0, 0.45),
+    0 0 36px rgba(157, 205, 184, 0.12);
+  animation: nasa-glow 6s ease-in-out infinite;
+}
+
+.nasa-moon figcaption {
+  margin-top: 0.35rem;
+  font-size: clamp(0.62rem, 2.6vw, 0.7rem);
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: rgba(157, 205, 184, 0.72);
+}
+
+@keyframes nasa-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.08);
+  }
 }
 
 .briefing .phase-line {
