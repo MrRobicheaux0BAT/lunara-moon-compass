@@ -366,12 +366,10 @@ function paintSunPortrait(date = new Date()) {
   bodyDisc.classList.remove('nasa')
   bodyDisc.style.removeProperty('--nasa-url')
   portraitCap.textContent = formatSunCaption(date)
-  skyPortrait.classList.add('ready')
 }
 
 function paintMoonPortrait(date = new Date()) {
   sunPortrait.hidden = true
-  skyPortrait.classList.add('ready')
   paintNasaMoon(date)
 }
 
@@ -406,7 +404,7 @@ function updateSky() {
     paintMeta()
 
     const visibility = describeSunVisibility(state.targetAltitude)
-    phaseLine.innerHTML = `<strong>${cycle.label}</strong> · sun`
+    phaseLine.innerHTML = `<strong>${cycle.label}</strong>`
     visibilityLine.textContent = visibility.summary
 
     const rise = cycle.times.sunrise ? formatClock(cycle.times.sunrise) : '—'

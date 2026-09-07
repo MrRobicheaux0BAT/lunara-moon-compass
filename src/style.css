@@ -417,62 +417,65 @@ html[data-sky='day'] .star {
   width: 5rem;
   flex-shrink: 0;
   display: grid;
-  grid-template-rows: 5rem 1.5em;
+  /* portrait stack */
   justify-items: center;
   gap: 0.2rem;
 }
 
 .portrait-frame {
   position: relative;
-  width: 5rem;
-  height: 5rem;
+  width: 4.75rem;
+  height: 4.75rem;
+  border-radius: 50%;
+  overflow: hidden;
+  flex: 0 0 auto;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent),
+    0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
-.sky-portrait img,
-.sky-portrait .sun-disc {
+/* Only show the active portrait medium — never override [hidden] */
+.sky-portrait img:not([hidden]),
+.sky-portrait .sun-disc:not([hidden]) {
   display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--ink) 70%, transparent);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent),
-    0 6px 20px rgba(0, 0, 0, 0.4),
-    0 0 28px color-mix(in srgb, var(--mist) 20%, transparent);
+  margin: 0;
+  padding: 0;
+  border: 0;
   animation: portrait-glow 6s ease-in-out infinite;
 }
 
-.sky-portrait:not(.ready) .portrait-frame {
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mist) 22%, transparent);
-  background: color-mix(in srgb, var(--ink) 55%, transparent);
+.sky-portrait img[hidden],
+.sky-portrait .sun-disc[hidden] {
+  display: none !important;
 }
 
-.sky-portrait .sun-disc {
+.sky-portrait .sun-disc:not([hidden]) {
   background:
     radial-gradient(circle at 36% 32%, #fff9e8 0%, #fde68a 28%, #f59e0b 62%, #b45309 100%);
-  box-shadow:
-    0 0 0 1px rgba(251, 191, 36, 0.35),
-    0 0 24px rgba(251, 191, 36, 0.45),
-    0 8px 28px rgba(0, 0, 0, 0.35);
-  position: relative;
+  box-shadow: inset 0 0 18px rgba(255, 247, 214, 0.25);
   overflow: hidden;
 }
 
-.sky-portrait .sun-disc::before {
+.sky-portrait .sun-disc:not([hidden])::before {
   content: "";
   position: absolute;
-  inset: -18%;
+  inset: 0;
   background:
-    repeating-conic-gradient(from 0deg, rgba(255, 247, 214, 0.55) 0 6deg, transparent 6deg 18deg);
-  opacity: 0.45;
+    repeating-conic-gradient(from 0deg, rgba(255, 247, 214, 0.4) 0 5deg, transparent 5deg 16deg);
+  opacity: 0.35;
   animation: sun-spin 48s linear infinite;
 }
 
-.sky-portrait .sun-disc::after {
+.sky-portrait .sun-disc:not([hidden])::after {
   content: "";
   position: absolute;
-  inset: 18%;
+  inset: 22%;
   border-radius: 50%;
   background:
     radial-gradient(circle at 38% 34%, #fff7d6, #fbbf24 50%, #d97706 100%);
